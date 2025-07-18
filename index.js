@@ -19,7 +19,8 @@ app.use(cookieParser());
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://jobhunt-site-6d3w.onrender.com'
+  'https://jobhunt-site-6d3w.onrender.com', // old, keep if needed
+  'https://jobhunt-site-y4ea.onrender.com'  // new deployed frontend
 ];
 const corsOptions = {
   origin: function (origin, callback) {
