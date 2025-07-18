@@ -16,14 +16,27 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://jobhunt-site-6d3w.onrender.com'
+];
 const corsOptions = {
-   origin: [
-     'http://localhost:5173',
-     'https://jobhunt-site-6d3w.onrender.com'
-   ],
-   credentials: true
-}
-app.use(cors(corsOptions))
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie']
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 const PORT = process.env.PORT || 3000;
 
