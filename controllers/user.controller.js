@@ -111,13 +111,21 @@ export const login = async (req, res) => {
       profile: user.profile
     }
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    // For deployed environment, we need to set secure cookies
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === undefined;
+    console.log("Login - Setting cookie with settings:", {
+        maxAge: 1 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+        path: '/'
+    });
     
     return res.status(200).cookie("token", token, { 
         maxAge: 1 * 24 * 60 * 60 * 1000, 
         httpOnly: true, 
-        sameSite: isProduction ? 'none' : 'lax',
-        secure: isProduction, // Set to true for production (HTTPS)
+        sameSite: 'none', // Always use 'none' for cross-origin requests
+        secure: true, // Always use secure for HTTPS
         path: '/' // Ensure cookie is accessible across all paths
     }).json({
       message: `Welcome back ${user.fullname}`,
@@ -135,13 +143,11 @@ export const login = async (req, res) => {
 }
 export const logout = async (req, res) => {
   try {
-    const isProduction = process.env.NODE_ENV === 'production';
-    
     return res.status(200).cookie("token", "", { 
         maxAge: 0,
         httpOnly: true,
-        sameSite: isProduction ? 'none' : 'lax',
-        secure: isProduction,
+        sameSite: 'none',
+        secure: true,
         path: '/' // Ensure cookie is cleared from all paths
     }).json({
       message: "Logged out successfully.",
