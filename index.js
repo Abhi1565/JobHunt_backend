@@ -22,8 +22,10 @@ const corsOptions = {
   origin: true, // Allow all origins
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Set-Cookie']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
+  exposedHeaders: ['Set-Cookie'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
@@ -50,6 +52,8 @@ app.listen(PORT, async () => {
        await connectDB();
        console.log(`Server running at port ${PORT}`);
        console.log(`API available at http://localhost:${PORT}`);
+       console.log(`CORS configured for origins:`, corsOptions.origin);
+       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
    } catch (error) {
        console.error("Failed to start server:", error);
        process.exit(1);
