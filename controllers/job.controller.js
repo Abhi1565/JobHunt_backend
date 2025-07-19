@@ -4,10 +4,6 @@ import mongoose from "mongoose";
 // admin post krega job
 export const postJob = async (req, res) => {
     try {
-        console.log("=== JOB CREATION START ===");
-        console.log("Received job data:", req.body);
-        console.log("User ID from token:", req.id);
-        
         const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
         const userId = req.id;
 
@@ -37,16 +33,12 @@ export const postJob = async (req, res) => {
             created_by: userId
         });
         
-        console.log("Job created successfully:", job._id);
-        console.log("=== JOB CREATION END ===");
-        
         return res.status(201).json({
             message: "New job created successfully.",
             job,
             success: true
         });
     } catch (error) {
-        console.log("Error creating job:", error);
         return res.status(500).json({
             message: "Internal server error",
             success: false
@@ -56,28 +48,15 @@ export const postJob = async (req, res) => {
 // student k liye
 export const getAllJobs = async (req, res) => {
     try {
-        console.log("=== GET ALL JOBS START ===");
-        
-        // Simple query like company - no complex logic
         const jobs = await Job.find({}).populate("company").sort({createdAt: -1});
 
-        console.log("Found jobs count:", jobs.length);
-        
-        // Log the found jobs for debugging
-        if (jobs.length > 0) {
-            console.log("Found jobs titles:", jobs.map(job => job.title));
-        }
-
-        console.log("=== GET ALL JOBS END ===");
         return res.status(200).json({
             jobs: jobs || [],
             success: true
         })
     } catch (error) {
-        console.log("Error in getAllJobs:", error);
-        console.log("Error details:", error.message);
         return res.status(500).json({
-            message: "Internal server error: " + error.message,
+            message: "Internal server error",
             success: false
         });
     }
@@ -105,23 +84,16 @@ export const getJobById = async (req, res) => {
 // admin kitne job create kra hai abhi tk
 export const getAdminJobs = async (req, res) => {
     try {
-        console.log("=== GET ADMIN JOBS START ===");
         const adminId = req.id;
-        console.log("Admin ID:", adminId);
-        
         const jobs = await Job.find({ created_by: adminId }).populate("company").sort({createdAt: -1});
         
-        console.log("Found admin jobs count:", jobs.length);
-        console.log("=== GET ADMIN JOBS END ===");
         return res.status(200).json({
             jobs: jobs || [],
             success: true
         })
     } catch (error) {
-        console.log("Error in getAdminJobs:", error);
-        console.log("Error details:", error.message);
         return res.status(500).json({
-            message: "Internal server error: " + error.message,
+            message: "Internal server error",
             success: false
         });
     }

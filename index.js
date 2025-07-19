@@ -17,9 +17,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
-// Remove allowedOrigins and custom origin function, allow all origins
+// CORS configuration for local development
 const corsOptions = {
-  origin: true, // Allow all origins
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:4173'], // Allow frontend ports
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -28,7 +28,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 
 // api's
 app.use("/api/v1/user",userRoute);

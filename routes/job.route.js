@@ -1,5 +1,4 @@
 import express from "express"
-import mongoose from "mongoose";
 import { postJob, getAllJobs, getAdminJobs, getJobById } from "../controllers/job.controller.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 
@@ -21,24 +20,6 @@ router.route("/test").get((req, res) => {
         timestamp: new Date().toISOString(),
         success: true 
     });
-});
-
-// Test database connection
-router.route("/test-db").get(async (req, res) => {
-    try {
-        const Job = mongoose.model('Job');
-        const count = await Job.countDocuments();
-        res.json({ 
-            message: "Database connection working", 
-            jobCount: count,
-            success: true 
-        });
-    } catch (error) {
-        res.status(500).json({ 
-            message: "Database error: " + error.message, 
-            success: false 
-        });
-    }
 });
 
 router.route("/post").post(isAuthenticated, postJob);
