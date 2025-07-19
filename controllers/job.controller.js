@@ -1,10 +1,13 @@
 import { Job } from "../models/job.model.js";
+import mongoose from "mongoose";
 
 // admin post krega job
 export const postJob = async (req, res) => {
     try {
+        console.log("=== JOB CREATION START ===");
         console.log("Received job data:", req.body);
         console.log("User ID from token:", req.id);
+        console.log("Request headers:", req.headers);
         
         const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
         const userId = req.id;
@@ -87,9 +90,24 @@ export const postJob = async (req, res) => {
             });
         }
         
+        console.log("All validations passed, attempting to create job...");
+        
+        // Check if the company exists
+        const Company = mongoose.model('Company');
+        const companyExists = await Company.findById(jobData.company);
+        if (!companyExists) {
+            console.log("Company not found:", jobData.company);
+            return res.status(400).json({
+                message: "Company not found",
+                success: false
+            });
+        }
+        console.log("Company found:", companyExists.name);
+        
         const job = await Job.create(jobData);
         
         console.log("Job created successfully:", job);
+        console.log("=== JOB CREATION END ===");
         
         return res.status(201).json({
             message: "New job created successfully.",
@@ -129,6 +147,7 @@ export const postJob = async (req, res) => {
 // student k liye
 export const getAllJobs = async (req, res) => {
     try {
+        console.log("=== GET ALL JOBS START ===");
         const keyword = req.query.keyword || "";
         console.log("Backend received keyword:", keyword);
         
@@ -162,6 +181,7 @@ export const getAllJobs = async (req, res) => {
             console.log("Found jobs titles:", jobs.map(job => job.title));
         }
 
+        console.log("=== GET ALL JOBS END ===");
         return res.status(200).json({
             jobs: jobs || [],
             success: true
@@ -197,10 +217,14 @@ export const getJobById = async (req, res) => {
 // admin kitne job create kra hai abhi tk
 export const getAdminJobs = async (req, res) => {
     try {
+        console.log("=== GET ADMIN JOBS START ===");
         const adminId = req.id;
+        console.log("Admin ID:", adminId);
         const jobs = await Job.find({ created_by: adminId }).populate({
             path: 'company'
         }).sort({createdAt: -1});
+        console.log("Found admin jobs count:", jobs.length);
+        console.log("=== GET ADMIN JOBS END ===");
         return res.status(200).json({
             jobs: jobs || [],
             success: true
