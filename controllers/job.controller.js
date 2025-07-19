@@ -17,13 +17,23 @@ export const postJob = async (req, res) => {
             })
         };
         
-        // Convert experience to number
-        const experienceLevel = parseInt(experience);
+        // Convert experience to number - handle various formats
+        let experienceLevel;
+        if (typeof experience === 'string') {
+            // Extract the first number from the string (e.g., "2 years" -> 2, "Entry level" -> 0)
+            const experienceMatch = experience.match(/\d+/);
+            if (experienceMatch) {
+                experienceLevel = parseInt(experienceMatch[0]);
+            } else {
+                // If no number found, default to 0 (entry level)
+                experienceLevel = 0;
+            }
+        } else {
+            experienceLevel = Number(experience);
+        }
+        
         if (isNaN(experienceLevel)) {
-            return res.status(400).json({
-                message: "Experience level must be a valid number.",
-                success: false
-            })
+            experienceLevel = 0; // Default to entry level if parsing fails
         }
         
         // Parse salary - extract numeric value from strings like "60 LPA"
@@ -65,6 +75,18 @@ export const postJob = async (req, res) => {
         
         console.log("Creating job with data:", jobData);
         
+        // Validate that all required fields are present
+        if (!jobData.title || !jobData.description || !jobData.requirements || 
+            jobData.salary === undefined || !jobData.location || !jobData.jobType || 
+            jobData.experienceLevel === undefined || jobData.position === undefined || 
+            !jobData.company || !jobData.created_by) {
+            console.log("Missing required fields in jobData:", jobData);
+            return res.status(400).json({
+                message: "Missing required fields for job creation",
+                success: false
+            });
+        }
+        
         const job = await Job.create(jobData);
         
         console.log("Job created successfully:", job);
@@ -81,6 +103,23 @@ export const postJob = async (req, res) => {
             message: error.message,
             stack: error.stack
         });
+        
+        // Check if it's a MongoDB connection error
+        if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+            return res.status(500).json({
+                message: "Database connection error. Please try again later.",
+                success: false
+            });
+        }
+        
+        // Check if it's a validation error
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                message: "Validation error: " + error.message,
+                success: false
+            });
+        }
+        
         return res.status(500).json({
             message: "Internal server error",
             success: false
@@ -114,7 +153,7 @@ export const getAllJobs = async (req, res) => {
         
         const jobs = await Job.find(query).populate({
             path: "company"
-        }).sort({createdAt: -1 });
+        }).sort({createdAt: -1});
 
         console.log("Found jobs count:", jobs.length);
         
@@ -159,7 +198,9 @@ export const getJobById = async (req, res) => {
 export const getAdminJobs = async (req, res) => {
     try {
         const adminId = req.id;
-        const jobs = await Job.find({ created_by: adminId }).populate({path:'company',createdAt:-1});
+        const jobs = await Job.find({ created_by: adminId }).populate({
+            path: 'company'
+        }).sort({createdAt: -1});
         return res.status(200).json({
             jobs: jobs || [],
             success: true
