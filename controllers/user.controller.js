@@ -113,6 +113,7 @@ export const login = async (req, res) => {
 
     // For deployed environment, we need to set secure cookies
     const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === undefined;
+    
     console.log("Login - Setting cookie with settings:", {
         maxAge: 1 * 24 * 60 * 60 * 1000,
         httpOnly: true,
@@ -124,9 +125,9 @@ export const login = async (req, res) => {
     return res.status(200).cookie("token", token, { 
         maxAge: 1 * 24 * 60 * 60 * 1000, 
         httpOnly: true, 
-        sameSite: 'none', // Always use 'none' for cross-origin requests
-        secure: true, // Always use secure for HTTPS
-        path: '/' // Ensure cookie is accessible across all paths
+        sameSite: 'none',
+        secure: true,
+        path: '/'
     }).json({
       message: `Welcome back ${user.fullname}`,
       user,
@@ -148,7 +149,7 @@ export const logout = async (req, res) => {
         httpOnly: true,
         sameSite: 'none',
         secure: true,
-        path: '/' // Ensure cookie is cleared from all paths
+        path: '/'
     }).json({
       message: "Logged out successfully.",
       success: true

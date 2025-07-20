@@ -11,7 +11,8 @@ const isAuthenticated = async (req, res, next) => {
         }
         
         console.log("Auth middleware - Cookies:", req.cookies);
-        console.log("Auth middleware - Headers:", req.headers);
+        console.log("Auth middleware - Cookie header:", req.headers.cookie);
+        console.log("Auth middleware - Origin:", req.headers.origin);
         console.log("Auth middleware - Token:", token ? "Present" : "Missing");
         
         if (!token) {
