@@ -2,8 +2,16 @@ import jwt from "jsonwebtoken";
 
 const isAuthenticated = async (req, res, next) => {
     try {
-        const token = req.cookies.token;
+        // Check for token in cookies first
+        let token = req.cookies.token;
+        
+        // If not in cookies, check Authorization header as fallback
+        if (!token && req.headers.authorization) {
+            token = req.headers.authorization.replace('Bearer ', '');
+        }
+        
         console.log("Auth middleware - Cookies:", req.cookies);
+        console.log("Auth middleware - Headers:", req.headers);
         console.log("Auth middleware - Token:", token ? "Present" : "Missing");
         
         if (!token) {
@@ -34,6 +42,7 @@ const isAuthenticated = async (req, res, next) => {
         req.id = decode.userId;
         next();
     } catch (error) {
+        console.log("Auth middleware - Error:", error.message);
         return res.status(401).json({
             message: "Authentication failed",
             success: false
