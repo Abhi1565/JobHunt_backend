@@ -117,22 +117,26 @@ export const login = async (req, res) => {
     console.log("Login - Setting cookie with settings:", {
         maxAge: 1 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         secure: true,
         path: '/'
     });
     
-    return res.status(200).cookie("token", token, { 
-        maxAge: 1 * 24 * 60 * 60 * 1000, 
-        httpOnly: true, 
-        sameSite: 'none',
-        secure: true,
-        path: '/'
-    }).json({
-      message: `Welcome back ${user.fullname}`,
-      user,
-      success: true
-    })
+    return res.status(200)
+      .cookie("token", token, { 
+          maxAge: 1 * 24 * 60 * 60 * 1000, 
+          httpOnly: true, 
+          sameSite: 'lax',
+          secure: true,
+          path: '/'
+      })
+      .header('Authorization', `Bearer ${token}`)
+      .json({
+        message: `Welcome back ${user.fullname}`,
+        user,
+        success: true,
+        token: token // Also send token in response for frontend storage
+      })
 
   } catch (error) {
     console.log(error);
@@ -147,7 +151,7 @@ export const logout = async (req, res) => {
     return res.status(200).cookie("token", "", { 
         maxAge: 0,
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         secure: true,
         path: '/'
     }).json({
