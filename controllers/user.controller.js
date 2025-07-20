@@ -114,13 +114,7 @@ export const login = async (req, res) => {
     // For deployed environment, we need to set secure cookies
     const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === undefined;
     
-    console.log("Login - Setting cookie with settings:", {
-        maxAge: 1 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: true,
-        path: '/'
-    });
+
     
     return res.status(200)
       .cookie("token", token, { 
