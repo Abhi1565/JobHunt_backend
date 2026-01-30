@@ -13,29 +13,27 @@ dotenv.config({});
 
 const app = express();
 
-// middleware
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS configuration - dynamically allow origins for credentials
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // allow requests without origin (Postman, curl)
     if (!origin) return callback(null, true);
-    
-    // Allow all origins for now - you can add specific origins here if needed
-    return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS not allowed"), false);
+    }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
-  exposedHeaders: ['Set-Cookie'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
 };
+
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 const PORT = process.env.PORT || 8000;
 
@@ -55,14 +53,13 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, async () => {
-   try {
-       await connectDB();
-       console.log(`Server running at port ${PORT}`);
-       console.log(`API available at http://localhost:${PORT}`);
-       console.log(`CORS configured for origins:`, corsOptions.origin);
-       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-   } catch (error) {
-       console.error("Failed to start server:", error);
-       process.exit(1);
-   }
-})
+  try {
+    await connectDB();
+
+    console.log(`🚀 Server started`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+    process.exit(1);
+  }
+});
